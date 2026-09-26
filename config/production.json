@@ -1,7 +1,7 @@
 {
   "environment": "production",
-  "debug": true,
-  "log_level": "DEBUG",
+  "debug": false,
+  "log_level": "INFO",
   "critical_health_threshold": 30,
   "maintenance_threshold": 60
 }
