@@ -15,6 +15,13 @@ REQUIRED_FIELDS = {
     "critical_health_threshold": int,
     "maintenance_threshold": int,
 }
+PRODUCTION_POLICY = {
+    "environment": "production",
+    "debug": False,
+    "log_level": "INFO",
+    "critical_health_threshold": 30,
+    "maintenance_threshold": 60,
+}
 
 
 @dataclass(frozen=True)
@@ -34,29 +41,15 @@ class Settings:
 
 
 def validate_config(data: Any) -> list[str]:
-    """Return human-readable schema and production-safety validation errors."""
+    """Compare settings against the canonical production policy."""
     errors = _validate_schema(data)
     if errors:
         return errors
-    errors = []
-    if not data["environment"].strip():
-        errors.append("environment must not be empty")
-    if data["log_level"] not in {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}:
-        errors.append("log_level must be DEBUG, INFO, WARNING, ERROR, or CRITICAL")
-    if data["environment"].lower() == "production":
-        if data["debug"]:
-            errors.append("debug must be false in production (found true)")
-        if data["log_level"] == "DEBUG":
-            errors.append("log_level must not be DEBUG in production (found DEBUG)")
-    critical = data["critical_health_threshold"]
-    maintenance = data["maintenance_threshold"]
-    if not 0 <= critical <= 100:
-        errors.append("critical_health_threshold must be between 0 and 100")
-    if not 0 <= maintenance <= 100:
-        errors.append("maintenance_threshold must be between 0 and 100")
-    if critical >= maintenance:
-        errors.append("critical_health_threshold must be lower than maintenance_threshold")
-    return errors
+    return [
+        f"{field} must be {expected!r} for production (found {data[field]!r})"
+        for field, expected in PRODUCTION_POLICY.items()
+        if data[field] != expected
+    ]
 
 
 def _validate_schema(data: Any) -> list[str]:
