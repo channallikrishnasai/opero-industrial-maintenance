@@ -1,0 +1,7 @@
+{
+  "environment": "production",
+  "debug": true,
+  "log_level": "DEBUG",
+  "critical_health_threshold": 40,
+  "maintenance_threshold": 75
+}
